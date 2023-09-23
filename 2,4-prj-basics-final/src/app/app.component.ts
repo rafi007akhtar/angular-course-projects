@@ -5,10 +5,4 @@ import { Component } from '@angular/core';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
 })
-export class AppComponent {
-  public tabChosen = 'recipes';
-
-  getChosenTab(ev: string) {
-    this.tabChosen = ev;
-  }
-}
+export class AppComponent {}

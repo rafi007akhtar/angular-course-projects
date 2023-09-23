@@ -26,6 +26,14 @@ export class RecipesService {
 
   selectRecipe = new EventEmitter<Recipe>();
 
+  getRecipeIndex(recipe: Recipe) {
+    return this.recipes.indexOf(recipe);
+  }
+
+  getRecipeFromIndex(index: number) {
+    return this.recipes[index];
+  }
+
   constructor() {}
 
   getRecipes() {
