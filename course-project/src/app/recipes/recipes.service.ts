@@ -25,7 +25,7 @@ export class RecipesService {
     ),
   ];
 
-  selectRecipe = new Subject<Recipe>();
+  recipesChanged = new Subject<Recipe[]>();
 
   getRecipeIndex(recipe: Recipe) {
     return this.recipes.indexOf(recipe);
@@ -39,5 +39,20 @@ export class RecipesService {
 
   getRecipes() {
     return [...this.recipes];
+  }
+
+  addNewRecipe(recipe: Recipe) {
+    this.recipes.push(recipe);
+    this.recipesChanged.next([...this.recipes]);
+  }
+
+  updateExistingRecipe(existingRecipeId: number, updatedRecipe: Recipe) {
+    this.recipes[existingRecipeId] = updatedRecipe;
+    this.recipesChanged.next([...this.recipes]);
+  }
+
+  deleteRecipe(recipeInd: number) {
+    this.recipes.splice(recipeInd, 1);
+    this.recipesChanged.next([...this.recipes]);
   }
 }
