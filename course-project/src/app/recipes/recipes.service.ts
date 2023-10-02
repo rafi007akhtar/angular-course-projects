@@ -7,23 +7,25 @@ import { Subject } from 'rxjs';
   providedIn: 'root',
 })
 export class RecipesService {
-  private recipes: Recipe[] = [
-    new Recipe(
-      'A Test Recipe',
-      'This is simply a test',
-      'https://upload.wikimedia.org/wikipedia/commons/1/15/Recipe_logo.jpeg',
-      [
-        new Ingredient('first hypothetical ingredient 1', 1),
-        new Ingredient('first hypothetical ingredient 2', 1),
-      ]
-    ),
-    new Recipe(
-      'A Test Recipe 2',
-      'This is simply a test',
-      'https://upload.wikimedia.org/wikipedia/commons/1/15/Recipe_logo.jpeg',
-      [new Ingredient('second hypothetical ingredient', 1)]
-    ),
-  ];
+  // private recipes: Recipe[] = [
+  //   new Recipe(
+  //     'A Test Recipe',
+  //     'This is simply a test',
+  //     'https://upload.wikimedia.org/wikipedia/commons/1/15/Recipe_logo.jpeg',
+  //     [
+  //       new Ingredient('first hypothetical ingredient 1', 1),
+  //       new Ingredient('first hypothetical ingredient 2', 1),
+  //     ]
+  //   ),
+  //   new Recipe(
+  //     'A Test Recipe 2',
+  //     'This is simply a test',
+  //     'https://upload.wikimedia.org/wikipedia/commons/1/15/Recipe_logo.jpeg',
+  //     [new Ingredient('second hypothetical ingredient', 1)]
+  //   ),
+  // ];
+
+  private recipes: Array<Recipe> = [];
 
   recipesChanged = new Subject<Recipe[]>();
 
@@ -39,6 +41,11 @@ export class RecipesService {
 
   getRecipes() {
     return [...this.recipes];
+  }
+
+  setRecipes(recipes: Recipe[]) {
+    this.recipes = recipes;
+    this.recipesChanged.next([...this.recipes]);
   }
 
   addNewRecipe(recipe: Recipe) {
