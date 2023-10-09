@@ -5,6 +5,8 @@ import { RecipeDetailComponent } from './recipes/recipe-detail/recipe-detail.com
 import { RecipeStartComponent } from './recipes/recipe-start/recipe-start.component';
 import { RecipeEditComponent } from './recipes/recipe-edit/recipe-edit.component';
 import { RecipesResolverService } from './recipes-resolver.service';
+import { AuthComponent } from './auth/auth.component';
+import { AuthGuardService } from './auth/auth-guard.service';
 
 export const routes: Route[] = [
   //   { path: '', redirectTo: 'recipes', pathMatch: 'full' },
@@ -13,6 +15,7 @@ export const routes: Route[] = [
     path: 'recipes',
     component: RecipesComponent,
     resolve: [RecipesResolverService],
+    canActivate: [AuthGuardService],
     children: [
       { path: '', component: RecipeStartComponent },
       { path: 'new', component: RecipeEditComponent },
@@ -21,4 +24,5 @@ export const routes: Route[] = [
     ],
   },
   { path: 'shopping-list', component: ShoppingListComponent },
+  { path: 'auth', component: AuthComponent },
 ];
