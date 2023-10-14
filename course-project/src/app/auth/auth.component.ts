@@ -1,8 +1,16 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import {
+  Component,
+  // ComponentFactoryResolver,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { AuthResponseData, AuthService } from './auth.service';
 import { Observable, Subscription } from 'rxjs';
 import { Router } from '@angular/router';
+import { AlertComponent } from '../shared/alert/alert.component';
+import { PlaceholderDirective } from '../shared/placeholder.directive';
 
 @Component({
   selector: 'app-auth',
@@ -10,8 +18,11 @@ import { Router } from '@angular/router';
   styleUrls: ['./auth.component.css'],
 })
 export class AuthComponent implements OnInit, OnDestroy {
+  @ViewChild(PlaceholderDirective) alertHost: PlaceholderDirective;
+
   authObs: Observable<AuthResponseData>;
   authSubs: Subscription;
+  alertSubs: Subscription;
   isLoginMode = true;
   isLoading = false;
   error = '';
@@ -30,9 +41,14 @@ export class AuthComponent implements OnInit, OnDestroy {
       'The password is invalid or the user does not have a password.',
     USER_DISABLED: 'The user account has been disabled by an administrator.',
     INVALID_LOGIN_CREDENTIALS: 'Incorrect username or password.',
+    'TOO_MANY_ATTEMPTS_TRY_LATER : Access to this account has been temporarily disabled due to many failed login attempts. You can immediately restore it by resetting your password or you can try again later.':
+      'Access to this account has been temporarily disabled due to many failed login attempts. You can immediately restore it by resetting your password or you can try again later.',
   };
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(
+    private authService: AuthService,
+    private router: Router // private componentFactoryResolver: ComponentFactoryResolver
+  ) {}
 
   ngOnInit(): void {}
 
@@ -70,6 +86,17 @@ export class AuthComponent implements OnInit, OnDestroy {
         const errorMessage = err?.error?.error?.message;
         if (errorMessage in this.errorMessages) {
           this.error = this.errorMessages[errorMessage];
+
+          // using view container ref to render component dynamically
+          const alertRef = this.alertHost.viewContainerRef;
+          alertRef.clear();
+          const alertCmp = alertRef.createComponent(AlertComponent);
+          alertCmp.instance.message = this.error;
+          this.alertSubs = alertCmp.instance.closeModal.subscribe(() => {
+            this.resetError();
+            alertRef.clear();
+            this.alertSubs.unsubscribe();
+          });
         }
       },
     });
@@ -77,7 +104,12 @@ export class AuthComponent implements OnInit, OnDestroy {
     form.reset();
   }
 
+  resetError() {
+    this.error = '';
+  }
+
   ngOnDestroy() {
     this.authSubs?.unsubscribe();
+    this.alertSubs?.unsubscribe();
   }
 }
