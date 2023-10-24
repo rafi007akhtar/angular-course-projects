@@ -85,7 +85,6 @@ export class AuthService {
       )
       .pipe(
         tap((res) => {
-          debugger;
           this.performUserAuthentication(
             res.email,
             res.localId,
