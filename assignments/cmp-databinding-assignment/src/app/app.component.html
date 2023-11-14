@@ -1,0 +1,9 @@
+<app-game-control (emitNum)="updateCounts($event)"></app-game-control>
+
+<div *ngFor="let count of evenCount; let i = index">
+  <app-even [index]="i + 1"></app-even>
+</div>
+
+<div *ngFor="let count of oddCount; let i = index">
+  <app-odd [index]="i + 1"></app-odd>
+</div>
