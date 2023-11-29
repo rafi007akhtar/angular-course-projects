@@ -109,7 +109,7 @@ this.activatedRoute.data.subscribe((data: Data) => {
 
 ## Routing Services
 
-There are 3 kinds of routing services that I know of. All three are services.
+There are 3 kinds of routing services that I know of.
 
 ### Auth Guards: Activated Guards
 
@@ -274,4 +274,41 @@ Lastly, use this data in the component TS [file](./3-routing-start/src/app/serve
 this.activatedRoute.data.subscribe((data) => {
   this.server = data.server;
 });
+```
+
+## Routing (Interceptors)
+
+Interceptors are services that are used to:
+
+- intercept a request midway, modify it, then send the modified request,
+- tap on the response of the request received and perform common operations based on the response.
+
+For this, first create a service file (manually, not using CLI) for the interceptor. For example, the [file](./8-http-01-start/src/app/auth-interceptor.service.ts) auth-interceptor.service.ts. In the class of this service, implement the `HttpInterceptor` interface imported from @angular/common/http.
+
+Inside the class, write the intercepting logic in the `intercept` method from the interface. Here, the request is getting cloned, a new header is added to the cloned request, and the cloned request is going as the request using `next.handle`.
+
+```ts
+export class AuthIntercepterService implements HttpInterceptor {
+  intercept(req: HttpRequest<any>, next: HttpHandler) {
+    const modifiedReq = req.clone({
+      headers: req.headers.append("test", "123"),
+    });
+    return next.handle(modifiedReq);
+  }
+}
+```
+
+For tapping into the response and performing common operations, refer to this [file](./8-http-01-start/src/app/logging-interceptor.service.ts).
+
+Next, add this service in the `providers` array of app module file. Keep in mind to:
+
+- add the class as a value of the `useClass` property
+- provide the `HTTP_INTERCEPTOR` enum which is needed for this service.
+
+```ts
+{
+    provide: HTTP_INTERCEPTORS,
+    useClass: AuthIntercepterService,
+    multi: true,
+},
 ```
