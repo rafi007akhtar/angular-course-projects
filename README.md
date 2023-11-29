@@ -298,12 +298,10 @@ export class AuthIntercepterService implements HttpInterceptor {
 }
 ```
 
-For tapping into the response and performing common operations, refer to this [file](./8-http-01-start/src/app/logging-interceptor.service.ts).
-
-Next, add this service in the `providers` array of app module file. Keep in mind to:
+Next, add this service in the `providers` array of app module [file](./8-http-01-start/src/app/app.module.ts). Keep in mind to:
 
 - add the class as a value of the `useClass` property
-- provide the `HTTP_INTERCEPTOR` enum which is needed for this service.
+- provide the `HTTP_INTERCEPTOR` token which is needed for this service.
 
 ```ts
 {
@@ -312,3 +310,5 @@ Next, add this service in the `providers` array of app module file. Keep in mind
     multi: true,
 },
 ```
+
+For tapping into the response and performing common operations, refer to this [file](./8-http-01-start/src/app/logging-interceptor.service.ts).
