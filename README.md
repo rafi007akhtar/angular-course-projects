@@ -312,3 +312,65 @@ Next, add this service in the `providers` array of app module [file](./8-http-01
 ```
 
 For tapping into the response and performing common operations, refer to this [file](./8-http-01-start/src/app/logging-interceptor.service.ts).
+
+## Routing (Lazy Loading)
+
+Lazy loading means when we navigate to a route, we load only the module associated with _that_ route. Only when we visit another route do we load the module associated to the other route.
+
+Thus, splitting the code into multiple modules is a prerequisite for lazy loading, at least in a module-based project (non-standalone).
+
+The code for lazy loading is written in your routes array. The module that you want to be loaded lazily should be passed as an `import` function argument to the `loadChildren` attribute of a route object, and resolved as a promise, like this:
+
+```ts
+const routes: Routes = [
+  {
+    path: "route-address",
+    loadChildren: () =>
+      import("path-to-your-module").then((m) => m.NameOfModule),
+  },
+];
+```
+
+For example, in the routing module [file](./course-project/src/app/app-routing.module.ts) of recipes, this is how the lazy-loading is written.
+
+```ts
+const routes: Routes = [
+  { path: "", redirectTo: "/recipes", pathMatch: "full" },
+  {
+    path: "recipes",
+    loadChildren: () =>
+      import("./recipes/recipes.module").then((m) => m.RecipesModule),
+  },
+  {
+    path: "shopping-list",
+    loadChildren: () =>
+      import("./shopping-list/shopping-list.module").then(
+        (m) => m.ShoppingListModule
+      ),
+  },
+  {
+    path: "auth",
+    loadChildren: () => import("./auth/auth.module").then((m) => m.AuthModule),
+  },
+];
+```
+
+**Note.** If you are lazily-loading a module, you should not load it eagerly as well. This means all the modules mentioned in the inside `loadChildren` functions of the `routes` array should _not_ be added in the `imports` array of the app-module.ts file.
+
+### Pre-loading Modules
+
+This can be used to make sure after the initial small bundle is loaded, the app continues to load other lazily-loaded routes in the mean time, so that there is less delay when the user would visit those routes.
+
+To implement this, import `PreloadAllModules` from @angular/router, and pass it as a value to `preloadingStrategy` in the `forRoot` method of the `RouterModule`, as shown below, and done in the same file.
+
+```ts
+@NgModule({
+  imports: [
+    RouterModule.forRoot(
+        routes,
+        { preloadingStrategy: PreloadAllModules }  // this line
+    ),
+  ],
+  exports: [RouterModule],
+})
+```
