@@ -357,7 +357,7 @@ const routes: Routes = [
 
 **Note.** If you are lazily-loading a module, you should not load it eagerly as well. This means all the modules mentioned in the inside `loadChildren` functions of the `routes` array should _not_ be added in the `imports` array of the app-module.ts file.
 
-### Pre-loading Modules
+### Pre-loading modules
 
 This can be used to make sure after the initial small bundle is loaded, the app continues to load other lazily-loaded routes in the mean time, so that there is less delay when the user would visit those routes.
 
@@ -374,3 +374,245 @@ To implement this, import `PreloadAllModules` from @angular/router, and pass it 
   exports: [RouterModule],
 })
 ```
+
+## NgRx (Modern Syntax)
+
+### Installations
+
+First, install it with the following command.
+
+```sh
+ng add @ngrx/store
+```
+
+This will install the NgRx store package and modify the app.module.ts [file](./15-ngrx-without-standalone/src/app/app.module.ts) like this:
+
+```ts
+imports: [
+  // ...
+  StoreModule.forRoot({}, {}),
+  // ...
+];
+```
+
+[Later](#handling-side-effects), side-effects will also be handled, with another package by NgRx. This can be installed like:
+
+```sh
+ng add @ngrx/effects
+```
+
+It will add the following change in the `imports` array of app.module.ts file:
+
+```ts
+imports: [
+  // ...
+  EffectsModule.forRoot([]),
+  // ...
+];
+```
+
+### Store setup
+
+Create a new folder for the store (not mandatory but considered a best practice), and inside of it create a reducer [file](./15-ngrx-without-standalone/src/app/store/counter.reducer.ts) (here, it's the counter.reducer.ts file.). Inside of this file, set up an initial state, and use it to create a reducer.
+
+```ts
+import { createReducer } from "@ngrx/store";
+const initialState = 0;
+export const counterReducer = createReducer(initialState);
+```
+
+Next, add this reducer in the app.module.ts file with a reducer name (key) and this reducer object (value), like:
+
+```ts
+StoreModule.forRoot({
+  counter: counterReducer,
+});
+```
+
+### Using selectors
+
+To get the value of a reducer from a store, a selector is needed. This is done by injecting the `Store` service in the constructor of the component where this value is needed, and passing the reducer name in the `select` method of its object.
+
+In the counter project [file](./15-ngrx-without-standalone/src/app/counter-output/counter-output.component.ts), it is done like this:
+
+```ts
+count$: Observable<number>;
+constructor(store: Store<counterModel>) {
+    this.count$ = store.select('counter');
+}
+```
+
+The value of this observable can then be shown in the HTML template [file](./15-ngrx-without-standalone/src/app/counter-output/counter-output.component.html) using the `async` pipe.
+
+```html
+<p class="counter">{{ count$ | async }}</p>
+```
+
+We can also pass a function as parameter to the `select` method, but that is done [below](#selector-functions-and-layering).
+
+### Creating actions
+
+Actions are dispatched whenever the state of a reducer needs changing. While they don't contain the state change logic, they are linked to the said logic inside the reducer.
+
+To create an action, we need an action name (first parameter), and an object that contains the value needed for the state change (second parameter) passed inside the `createAction` function. Make sure the action name is unique.
+
+Example:
+
+```ts
+import { createAction, props } from "@ngrx/store";
+
+export const increment = createAction(
+  "COUNTER:INCREMENT",
+  props<{ value: number }>()
+);
+```
+
+As a best practice, create all actions in their own action [file](./15-ngrx-without-standalone/src/app/store/counter.actions.ts). Also, action names should be unique throughout the store (and not just reducer), so make sure to put the reducer name (here "COUNTER") in the action name along with its purpose (here"INCREMENT").
+
+### Linking actions to state change logic
+
+This is done in the reducer. Inside the reducer, we can add multiple actions with their logic for state change in the `on` function.
+
+The `on` function takes the action object (imported from the action ts file) as its first argument, and an inline function where the state changes as the second argument.
+
+It can be written like this:
+
+```ts
+import { createReducer, on } from "@ngrx/store";
+import { increment } from "./counter.actions";
+
+const initialState = 0;
+
+export const counterReducer = createReducer(
+  initialState,
+  on(increment, (prevState, props) => prevState + props.value)
+);
+```
+
+Here, for the counter, we are setting the inital state as 0. Then, when the `increment` option is dispatched, we are increasing the value of the state by `props.value`. The previous state is automatically provided by NgRx as the first parameter of this inline function.
+
+### Dispatching actions
+
+This is pretty simple. You just have to import the action from the actions TS file, and pass it to the `dispatch` method of the store object.
+
+Syntax:
+
+```ts
+import { actionObject } from "path-to-actions-file";
+import { Store } from '@ngrx/store';
+
+// ... then inside the class
+    constructor(private store: Store<typeOfStore>) {}
+
+    methodForDispatchingAction() {
+        const actionProp = {propName: propVal}
+        this.store.dispatch(actionObject(actionProp));
+    }
+```
+
+Example, in the counter controls [file](./15-ngrx-without-standalone/src/app/counter-controls/counter-controls.component.ts):
+
+```ts
+import { Store } from '@ngrx/store';
+import { increment } from '../store/counter.actions';
+import { counterModel } from '../store/store.model';
+
+// ... then inside the class
+  constructor(private store: Store<counterModel>) {}
+
+  increment() {
+    this.store.dispatch(increment({ value: 1 }));
+  }
+```
+
+This method can be bound to a button in the HTML template [file](./15-ngrx-without-standalone/src/app/counter-controls/counter-controls.component.html), so that pressig on it changes the state.
+
+```html
+<button (click)="increment()">Increment</button>
+```
+
+### Selector functions and layering
+
+As a best practice, all selectors should be defined in their own [file](./15-ngrx-without-standalone/src/app/store/counter.selectors.ts).
+
+A selector, like seen above, can take a string parameter to get the selector from the store, but it can also take a function parameter. Such a selector is defined, for example, like this:
+
+```ts
+export const countSelector = (state: counterModel) => state.counter;
+```
+
+The paramter this function receives is the overall state of the store, and it returns the reducer specified. This approach is preferred over the string-based approach in complex applications where the same reducer is being used in multiple places, having a central location, like a selector file, to access it is more streamline.
+
+We can then use it in the component file like this:
+
+```ts
+import { countSelector } from "../store/counter.selectors";
+
+// then inside the constructor
+this.count$ = store.select(countSelector);
+// instead of: this.count$ = store.select('counter');
+```
+
+We can also layer selectors using the `createSelector` function, which takes the inline function as an argument. In this inline function we put multiple functions, and the return value of one the current function is the input to the next. The value returned in the final function is the return value of the overall function.
+
+Example:
+
+```ts
+import { createSelector } from "@ngrx/store";
+import { counterModel } from "./store.model";
+
+export const countSelector = (state: counterModel) => state.counter;
+export const doubleCountSelector = createSelector(
+  countSelector,
+  (state) => state * 2
+);
+```
+
+Here, it is simply returning the doubled value of the value returned by the counter reducer.
+
+### Handling side-effects
+
+A side-effect is any code we wish to execute when an action gets dispatched that does not directly result in a state change. For example, with the value of the state upon dispatching an action, we wish to send an HTTP request. This should not be written inside the reducer function, as it will result in unperceivable instability in the application. Instead, this should be handled separately, and here, with the effects.
+
+To start, as a best practice, create a [file](./15-ngrx-without-standalone/src/app/store/counter.effects.ts) containing all the effects.
+
+Now, if we want to store the new state value in locala storage and log the action, for example, we will first have to create a class in this effects file. In this class, we inject the store and the actions, so something like:
+
+```ts
+import { Actions } from "@ngrx/effects";
+import { Store } from "@ngrx/store";
+export class CounterEffefcts {
+  constructor(private actions$: Actions, private store: Store<counterModel>);
+}
+```
+
+Now inside this class we create a new action called `saveCount` using `createEffect` function imported from @ngrx/effects. The first parameter it takes is an inline function, where we `pipe` the actions injected. Inside this pipe we pass some arguments: the first is calling `ofType`. We want this effect too happen every time the increment or decrement actions are dispatched, so we pass those two arguments here. Next, we want the action and counter data after these actions are dispatched. For that, we use `withLatestFrom` function and pass the counter selector. Finally, we write the logging and storing logic in the `tap` function, as shown below:
+
+```ts
+import { Actions, createEffect, ofType } from "@ngrx/effects";
+import { decrement, increment } from "./counter.actions";
+import { tap, withLatestFrom } from "rxjs/operators";
+import { Store } from "@ngrx/store";
+import { counterModel } from "./store.model";
+import { countSelector } from "./counter.selectors";
+
+@Injectable()
+export class CounterEffects {
+  saveCount = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(increment, decrement),
+        withLatestFrom(this.store.select(countSelector)),
+        tap(([action, counter]) => {
+          console.log({ action });
+          localStorage.setItem("count", counter.toString());
+        })
+      ),
+    { dispatch: false }
+  );
+
+  constructor(private actions$: Actions, private store: Store<counterModel>) {}
+}
+```
+
+The second parameter passed is `{disptach: false}` so that a new action is not dispatched once the effect is done (default is `true`). Lastly, this class is be made `Injectable`.
