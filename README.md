@@ -1,6 +1,20 @@
 # Course Notes
 
+Skip to:
+
+- [Routing (Basics)](#routing-basics)
+- [Routing Services](#routing-services)
+  - [Auth Guards: Activated Guards](#auth-guards-activated-guards)
+  - [Auth Guards: Deactivated Guards](#auth-guards-deactivated-guards)
+  - [Resolvers](#resolvers)
+- [Routing (Interceptors)](#routing-interceptors)
+- [Routing (Lazy Loading)](#routing-lazy-loading)
+  - [Pre-loading modules](#pre-loading-modules)
+- [NgRx (Modern Syntax)](#ngrx-modern-syntax)
+
 ## Routing (Basics)
+
+[🔝](#course-notes)
 
 First, we need a routes array. As a best practice, this is often created inside its own module file, so create that.
 
@@ -109,9 +123,13 @@ this.activatedRoute.data.subscribe((data: Data) => {
 
 ## Routing Services
 
+[🔝](#course-notes)
+
 There are 3 kinds of routing services that I know of.
 
 ### Auth Guards: Activated Guards
+
+[🔝](#course-notes)
 
 The first is the one that you activate. It's purpose is to block access to routes that are not activated. This can be useful when trying to block access to unauthenticated users.
 
@@ -172,6 +190,8 @@ To use this, just add this guard as a value to the `canActivate` or `canActivate
 ```
 
 ### Auth Guards: Deactivated Guards
+
+[🔝](#course-notes)
 
 The second auth guards are the ones for deactivation. Their purpose is to stop the user from navigating away from a route unless confirmation is received. For this, first create a service to house the interface for deactivation.
 
@@ -237,6 +257,8 @@ Essentially, the user will be allowed to leave the route when the `canDeactivate
 
 ### Resolvers
 
+[🔝](#course-notes)
+
 These are used to get dynamic data in the in a route object (as opposed to `data`, which was for static data).
 
 To use this in your application, first create the resolver service.
@@ -278,6 +300,8 @@ this.activatedRoute.data.subscribe((data) => {
 
 ## Routing (Interceptors)
 
+[🔝](#course-notes)
+
 Interceptors are services that are used to:
 
 - intercept a request midway, modify it, then send the modified request,
@@ -314,6 +338,8 @@ Next, add this service in the `providers` array of app module [file](./8-http-01
 For tapping into the response and performing common operations, refer to this [file](./8-http-01-start/src/app/logging-interceptor.service.ts).
 
 ## Routing (Lazy Loading)
+
+[🔝](#course-notes)
 
 Lazy loading means when we navigate to a route, we load only the module associated with _that_ route. Only when we visit another route do we load the module associated to the other route.
 
@@ -359,6 +385,8 @@ const routes: Routes = [
 
 ### Pre-loading modules
 
+[🔝](#course-notes)
+
 This can be used to make sure after the initial small bundle is loaded, the app continues to load other lazily-loaded routes in the mean time, so that there is less delay when the user would visit those routes.
 
 To implement this, import `PreloadAllModules` from @angular/router, and pass it as a value to `preloadingStrategy` in the `forRoot` method of the `RouterModule`, as shown below, and done in the same file.
@@ -376,6 +404,8 @@ To implement this, import `PreloadAllModules` from @angular/router, and pass it 
 ```
 
 ## NgRx (Modern Syntax)
+
+[🔝](#course-notes)
 
 ### Installations
 
