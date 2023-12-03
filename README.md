@@ -11,6 +11,8 @@ Skip to:
 - [Routing (Lazy Loading)](#routing-lazy-loading)
   - [Pre-loading modules](#pre-loading-modules)
 - [NgRx (Modern Syntax)](#ngrx-modern-syntax)
+- [Reactive Forms (external)](#reactive-forms-external)
+- [Unit testing (external)](#unit-testing-external)
 
 ## Routing (Basics)
 
@@ -646,3 +648,15 @@ export class CounterEffects {
 ```
 
 The second parameter passed is `{disptach: false}` so that a new action is not dispatched once the effect is done (default is `true`). Lastly, this class is be made `Injectable`.
+
+## Reactive Forms (external)
+
+[🔝](#course-notes)
+
+Refer to these notes (drawn from the official docs): https://github.com/rafi007akhtar/angular-forms/blob/master/learning-notes.md
+
+## Unit testing (external)
+
+[🔝](#course-notes)
+
+Refer to these notes (drawn from the official docs): https://github.com/rafi007akhtar/angular-tests
