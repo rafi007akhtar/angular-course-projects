@@ -1,0 +1,23 @@
+@defer (on immediate) {
+<app-show-info [name]="name" *ngIf="name"></app-show-info>
+} @placeholder (minimum 1ms) { Loading name }
+
+<br />
+
+@defer (on immediate) {
+<app-show-info name="Akhtar" #akhtar></app-show-info>
+} @placeholder {
+<button>Show last name</button>
+}
+
+<br />
+
+@defer (on viewport(test2)) {
+<app-show-info name="Test" backgroundColor="blue"></app-show-info>
+} @placeholder {
+<app-show-info name="Test"></app-show-info>
+}
+
+<br />
+
+<app-show-info name="Test2" #test2></app-show-info>
