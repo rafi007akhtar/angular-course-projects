@@ -133,7 +133,7 @@ There are 3 kinds of routing services that I know of.
 
 [🔝](#course-notes)
 
-The first is the one that you activate. It's purpose is to block access to routes that are not activated. This can be useful when trying to block access to unauthenticated users.
+The first is the one that you activate. Its purpose is to block access to routes that are not activated. This can be useful when trying to block access to unauthenticated users.
 
 To set this up, create a new service for this authguard.
 
